@@ -22,19 +22,16 @@ transpose x = (map head x) : transpose (map tail x)
 
 mulMatrix x y = [[sumList (vector dot a b)| b<-(transpose y)]| a<-x]
 
-reduceMatrix::(Fractional a, Ord a) => [[a]] -> [[a]]
-reduceMatrix (x:[]) = [x]
-reduceMatrix (x:xs)
-    | firstColZero (x:xs) = (x : (reduceMatrix  (subMatrix xs)))
-    | 0 == head x         = reduceMatrix $ xs++[x]
-    | otherwise           = (x : (map (0:) ((reduceMatrix . subMatrix . clearFirstCol) $ (x:xs))))
+ref::(Fractional a, Ord a) => [[a]] -> [[a]]
+ref (x:[]) = [x]
+ref (x:xs)
+    | firstColZero (x:xs) = (x : (ref  (subMatrix xs)))
+    | 0 == head x         = ref $ xs++[x]
+    | otherwise           = (x : (map (0:) ((ref . subMatrix . clearFirstCol) $ (x:xs))))
     where
         firstColZero x = all (==0) (map head x)
-
         subMatrix x = map tail $ tail x
-
         clearFirstCol (x:xs) = (x:map (scaledSubtract x) xs)
-
         scaledSubtract:: (Fractional a, Ord a) => [a] -> [a] -> [a]
         scaledSubtract (x:xs) (y:ys)
           | y == 0    = (0:ys)
@@ -42,3 +39,9 @@ reduceMatrix (x:xs)
           where
               scaled:: (Fractional a) => a -> [a] ->[a]
               scaled y (x:xs) = map (*(-y/x)) (x:xs)
+
+identityMatrix::(Eq a, Enum a, Num a)=> a -> [[a]]
+identityMatrix 0 = [[]]
+identityMatrix n = [[if i == j then 1 else 0 | j<-[1..n]]|i<-[1..n]]
+
+ 
